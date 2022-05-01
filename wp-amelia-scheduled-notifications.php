@@ -4,7 +4,7 @@
  * Plugin Name:         Amelia Scheduled Notifications
  * Plugin URI:          https://github.com/xewl/wp-amelia-scheduled-notifications
  * Description:         Easily register the scheduled notifications of the Amelia booking plugin to WP-Cron.
- * Version:             0.0.1
+ * Version:             0.0.2
  * Author:              Xewl
  * Author URI:          https://xewl.dev
  * Text Domain:         wpamsn
@@ -35,19 +35,22 @@ if( $amelia_activated ) {
       wp_schedule_event( time(), 'wpamsn_quarter_hour', 'wpamsn_cron_hook__scheduled_notifications' );
    }
 } else {
-   if ( wp_next_scheduled( 'wpamsn_cron_hook__scheduled_notifications' ) ) {
-      wpamsn_deactivate();
-   }
+   wpamsn_unschedule_cron_hooks();
    add_action( 'admin_notices', 'wpamsn_cron_exec__admin_notice__dependencies' );
 }
 
 
 register_deactivation_hook( __FILE__, 'wpamsn_deactivate' ); 
 function wpamsn_deactivate() {
-   $timestamp = wp_next_scheduled( 'wpamsn_cron_hook' );
-   wp_unschedule_event( $timestamp, 'wpamsn_cron_hook' );
+   wpamsn_unschedule_cron_hooks();
 }
 
+
+function wpamsn_unschedule_cron_hooks(){
+   if ( $timestamp = wp_next_scheduled( 'wpamsn_cron_hook__scheduled_notifications' ) ) {
+       wp_unschedule_event( $timestamp, 'wpamsn_cron_hook__scheduled_notifications' );
+   }
+}
 
 
 function wpamsn_cron_exec__admin_notice__dependencies() {
